@@ -1,0 +1,14 @@
+{
+  "name": "Civibot",
+  "version": "1.0.0",
+  "description": "Slack bot for the CiviForm workspace",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nick Burgan",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@slack/bolt": "^3.21.1"
+  }
+}
