@@ -1,23 +1,117 @@
 const { exec } = require('child_process');
+const { ADMIN_ROOMS, CIVIBOT_GIT_HOME } = require('../utils.js');
 
-admins = [
-  'nick.burgan',
-]
+function execWithLog(command, callback) {
+  console.log(`Executing ${command}`);
+  exec(command, (error, stdout, stderr) => {
+    if(stdout) { console.log(`STDOUT\n${stdout}`); }
+    if(stderr) { console.log(`STDERR\n${stderr}`); }
+    callback(error, stdout, stderr);
+  });
+}
 
-function pullCode(user, branch) {
-  return new Promise((resolve, reject) => {
-    if (branch != 'main' && admins.indexOf(user) == -1) {
-      reject('You can only pull from the main branch');
+function gitRevParse(rev, context, callback) {
+  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git rev-parse ${rev}`, (error, stdout, stderr) => {
+    if(error) {
+      console.log(`git rev-parse ${rev} failse: ${error}`);
+      context.say(`git rev-parse ${rev} failed: ${error}`);
+    } else {
+      if(callback) { callback(stdout.trim()); }
     }
-    exec(`git fetch origin && git checkout origin/${branch}`, (err, stdout, stderr) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(stdout);
+  });
+}
+
+function gitFetch(context, callback) {
+  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git fetch origin`, (error, stdout, stderr) => {
+    if(error) {
+      console.log(`git fetch origin failed: ${error}`);
+      context.say(`git fetch origin failed: ${error}`);
+    } else {
+      if(callback) { callback(); }
+    }
+  });
+}
+
+function gitCheckout(rev, context, callback) {
+  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git checkout ${rev}`, (error, stdout, stderr) => {
+    if(error) {
+      console.log(`git checkout ${rev} failed: ${error}`);
+      context.say(`git checkout ${rev} failed: ${error}`);
+    } else {
+      if(callback) { callback(); }
+    }
+  });
+}
+
+function gitLog(parent, child, context, callback) {
+  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git log --no-merges --pretty=format:'%h %s - %an' ${parent}..${child}`, (error, stdout, stderr) => {
+    if(error) {
+      console.log(`git log ${parent}..${child} failed: ${error}`);
+      context.say(`git log ${parent}..${child} failed: ${error}`);
+    } else {
+      output = stdout.trim()
+      logs = []
+      if(!!output) {
+        logs = output.split("\n")
       }
+      if(callback) { callback(logs); }
+    }
+  });
+}
+
+function install(context, callback){
+  execWithLog(`make install`, (error, stdout, stderr) => {
+    if(error) {
+      console.log(`Make failed: ${error}`);
+      context.say(`Make failed: ${error}`);
+    } else {
+      if(callback) { callback(); }
+    }
+  });
+}
+
+function deploy(rev, force, context) {
+  gitRevParse("HEAD", context, (head_rev) => {
+    gitFetch(context, () => {
+      gitRevParse(rev, context, (parsed_rev) => {
+        if (head_rev === parsed_rev) {
+          if(force){
+            context.say(`I think I'm already running ${rev}, but I'll deploy it anyway.`)
+          } else {
+            context.say(`I think I'm already running ${rev}, so I'm not deploying it again.`)
+            return;
+          }
+        } else {
+          context.say(`Upgrading from revision ${head_rev} to revision ${parsed_rev}`);
+        }
+        gitLog(head_rev, parsed_rev, context, (commits) => {
+          if(commits.length > 0) {
+            m = commits.join("\n")
+            if(commits.length > 5) {
+              m += `\n..and ${commits.length - 5} more`
+            }
+            context.say(m)
+          }
+        });
+        gitCheckout(parsed_rev, context, () => {
+          install(context, () => {
+            context.say(`Successfully deployed revision ${parsed_rev}!`);
+          });
+        });
+      });
     });
   });
 }
-module.exports = (app) => {
 
+module.exports = (app) => {
+  app.message(/^!deploy (\S+)( force)?$/, ({ message, context }) => {
+    if(ADMIN_ROOMS.includes(message.channel)){
+      rev = context.matches[1];
+      force = context.matches[2]
+      if(rev === 'latest') {
+        rev = 'origin/main';
+      }
+      deploy(rev, force, context);
+    }
+  })
 }
