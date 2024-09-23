@@ -1,56 +1,63 @@
 const { App } = require('@slack/bolt');
 const fs = require('fs');
 const path = require('path');
-const { loadBrain, saveBrain } = require('./brain.js');
+const { loadBrain } = require('./brain.js');
 
-brain = loadBrain();
-module.exports = { brain };
-
-// Create the app
-const app = new App({
-  token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
-  socketMode: true,
-  appToken: process.env.SLACK_APP_TOKEN,
-  port: process.env.PORT || 30000
-});
-
-// On startup, load all current users into the brain
-async function loadUsers() {
-  try {
-    const result = await app.client.users.list({
-      token: process.env.SLACK_BOT_TOKEN
-    });
-
-    result.members.forEach(user => {
-      if (!user.is_bot && !user.deleted) {
-        brain.users[user.id] = {
-          name: user.name,
-          real_name: user.profile.real_name,
-          display_name: user.profile.display_name,
-        };
-      }
-    });
-    console.log('Saving current Slack workspace users to brain');
-    saveBrain();
-  } catch (error) {
-    console.error('Error fetching users:', error);
-  }
+let secrets = {
+  'SLACK_BOT_TOKEN': '',
+  'SLACK_SIGNING_SECRET': '',
+  'SLACK_APP_TOKEN': ''
 }
-loadUsers();
 
-// Load scripts
-const scriptsPath = path.join(__dirname, 'scripts');
-fs.readdirSync(scriptsPath).forEach(file => {
-  if (file.endsWith('.js')) {
-    require(path.join(scriptsPath, file))(app, brain);
-  }
-});
+async function loadAllSecrets() {
+  const { SecretsManagerClient, ListSecretsCommand, GetSecretValueCommand } = await import('@aws-sdk/client-secrets-manager');
+  const secretsManager = new SecretsManagerClient({ region: 'us-east-1', profile: 'default' });
+  const listResponse = await secretsManager.send(new ListSecretsCommand({}));
+  const secretArns = listResponse.SecretList;
+  const secretPromises = Object.keys(secrets).map(async (secret) => {
+    const secretArn = secretArns.find(s => s.Tags.some(tag => tag.Key === 'name' && tag.Value === secret));
+    if (!secretArn) {
+      throw new Error(`Secret ${secret} not found`);
+    }
 
-// Start the app
-(async () => {
-  // Start your app
+    const value = await secretsManager.send(new GetSecretValueCommand({ SecretId: secretArn.ARN }));
+    secrets[secret] = JSON.parse(value.SecretString)[secret];
+    console.log(`Loaded secret ${secret}`);
+  });
+  await Promise.all(secretPromises);
+}
+
+async function startApp() {
+  await loadAllSecrets();
+
+  // Load the brain from disk on startup
+  loadBrain();
+
+  // Create the app
+  const app = new App({
+    token: secrets.SLACK_BOT_TOKEN,
+    signingSecret: secrets.SLACK_SIGNING_SECRET,
+    socketMode: true,
+    appToken: secrets.SLACK_APP_TOKEN,
+    port: process.env.PORT || 30000
+  });
+
+  // Load all users on startup, then listen for new user events
+  require('./users.js')(app);
+
+  // Load scripts
+  const scriptsPath = path.join(__dirname, 'scripts');
+  fs.readdirSync(scriptsPath).forEach(file => {
+    if (file.endsWith('.js')) {
+      require(path.join(scriptsPath, file))(app);
+    }
+  });
+
   await app.start();
 
   console.log('⚡️ CiviBot is running!');
-})();
+}
+
+startApp().catch((error) => {
+  console.error('Error starting CiviBot:', error);
+});

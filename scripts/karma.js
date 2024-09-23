@@ -1,6 +1,8 @@
-module.exports = (app, brain) => {
-  const { saveBrain } = require('../brain.js');
+module.exports = (app) => {
+  const { getBrain, saveBrain } = require('../brain.js');
 
+  const brain = getBrain();
+  
   ignorelist = [
     /^(lib)?stdc$/,
     /-{2,}/,
