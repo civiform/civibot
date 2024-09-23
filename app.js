@@ -2,6 +2,7 @@ const { App } = require('@slack/bolt');
 const fs = require('fs');
 const path = require('path');
 const { loadBrain } = require('./brain.js');
+const { ADMIN_ROOMS } = require('./utils.js');
 
 let secrets = {
   'SLACK_BOT_TOKEN': '',
@@ -42,8 +43,19 @@ async function startApp() {
     port: process.env.PORT || 30000
   });
 
+  // Middleware to ensure we always provide thread_ts when it exists
+  // so we respond in the appropriate way.
+  app.use(async ({ message, context, say, next}) => {
+    context.say = async (text) => {
+      if(text) {
+        await say({ text: text, thread_ts: message.thread_ts})
+      }
+    }
+    await next();
+  })
+
   // Load all users on startup, then listen for new user events
-  require('./users.js')(app);
+  //require('./users.js')(app);
 
   // Load scripts
   const scriptsPath = path.join(__dirname, 'scripts');
@@ -55,9 +67,16 @@ async function startApp() {
 
   await app.start();
 
+  for (const room of ADMIN_ROOMS) {
+    await app.client.chat.postMessage({
+      token: secrets.SLACK_BOT_TOKEN,
+      channel: room,
+      text: '⚡️ CiviBot is running!'
+    });
+  }
   console.log('⚡️ CiviBot is running!');
 }
 
 startApp().catch((error) => {
-  console.error('Error starting CiviBot:', error);
+  console.error('Error:', error);
 });

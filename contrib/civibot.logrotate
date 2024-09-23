@@ -1,0 +1,9 @@
+/home/civibot/civibot_logs/civibot.log {
+  weekly
+  missingok
+  copytruncate
+  compress
+  dateext
+  rotate 6
+  create 0600 civibot civibot
+}

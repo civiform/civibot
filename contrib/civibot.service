@@ -1,0 +1,21 @@
+
+[Unit]
+Description=Civibot
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/civibot/civibot
+User=civibot
+
+Restart=always
+RestartSec=10
+
+StandardOutput=null
+StandardError=null
+
+ExecStart=/bin/bash -c "node app.js >> /home/civibot/civibot_logs/civibot.log 2>&1"
+
+[Install]
+WantedBy=multi-user.target

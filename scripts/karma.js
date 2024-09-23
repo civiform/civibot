@@ -128,7 +128,7 @@ module.exports = (app) => {
     return messages.join('\n');
   }
 
-  app.message(/(\S|\s)(--|\+\+)(\s|$)/, async ({ message, say }) => {
+  app.message(/(\S|\s)(--|\+\+)(\s|$)/, async ({ message, context }) => {
     plus_matches = []
     // Group 4 is @name followed by a space
     // Group 5 is word not followed by a space, :, or +
@@ -154,7 +154,7 @@ module.exports = (app) => {
     }
     result = await changeKarma(message, plus_matches, true);
     if (result && result.trim()) {
-      await say(result);
+      await context.say(result);
     }
 
     minus_matches = []
@@ -177,11 +177,11 @@ module.exports = (app) => {
     }
     result = await changeKarma(message, minus_matches, false);
     if (result && result.trim()) {
-      await say(result);
+      await context.say(result);
     }
   });
 
-  app.message(/^!\s*karma\s?(top|best)?$/i, async ({ say }) => {
+  app.message(/^!\s*karma\s?(top|best)?$/i, async ({ context }) => {
     messages = ['The Most Karmically Awesome'];
     top_karma = top(5);
     let rank = 1;
@@ -189,10 +189,10 @@ module.exports = (app) => {
       messages.push(`${rank}. ${subject}: ${karma}`);
       rank++;
     }
-    await say(messages.join('\n'));
+    await context.say(messages.join('\n'));
   });
 
-  app.message(/^!\s*karma (bottom|worst)$/i, async ({say }) => {
+  app.message(/^!\s*karma (bottom|worst)$/i, async ({ context }) => {
     messages = ['The Most Karmically Challenged'];
     top_karma = bottom(5);
     let rank = 1;
@@ -200,22 +200,22 @@ module.exports = (app) => {
       messages.push(`${rank}. ${subject}: ${karma}`);
       rank++;
     }
-    await say(messages.join('\n'));
+    await context.say(messages.join('\n'));
   });
 
-  app.message(/^!\s*karma (clear|reset) ([\s\S]+)$/, async ({ context, message, say }) => {
+  app.message(/^!\s*karma (clear|reset) ([\s\S]+)$/, async ({ context }) => {
     subject = context.matches[2].trim();
     if (subject.match(/^<@(\S+)>$/) || userNameExists(subject)) {
-      await say("You can't clear a person's karma. Don't be mean!");
+      await context.say("You can't clear a person's karma. Don't be mean!");
     } else {
       subject = subject.toLowerCase();
       let prevKarma = getKarma(subject);
       clearKarma(subject);
-      await say(`All ${prevKarma} of ${subject}'s karma has evaporated into nothingness.`);
+      await context.say(`All ${prevKarma} of ${subject}'s karma has evaporated into nothingness.`);
     }
   });
 
-  app.message(/^!\s*karma (.+)$/i, async ({ context, message, say }) => {
+  app.message(/^!\s*karma (.+)$/i, async ({ context }) => {
     subject = context.matches[1].trim();
     userMatch = subject.match(/<@(\S+)>/);
     if (userMatch) {
@@ -224,9 +224,9 @@ module.exports = (app) => {
       subject = subject.toLowerCase();
     }
     if (subject in brain.karma) {
-      await say(`Karma for ${subject}: ${getKarma(subject)}`);
+      await context.say(`Karma for ${subject}: ${getKarma(subject)}`);
     } else {
-      await say(`No karma for ${subject}`);
+      await context.say(`No karma for ${subject}`);
     }
   });
 }

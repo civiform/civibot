@@ -16,6 +16,7 @@ function loadBrain() {
   }
   brain.karma = brain.karma || {};
   brain.users = brain.users || {};
+  brain.facts = brain.facts || {};
   return brain;
 }
 
