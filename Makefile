@@ -22,10 +22,10 @@ install:
 	sudo mkdir -p $(LOGDIR) $(BACKUPDIR) $(SYSCONFDIR)/civibot $(INITDIR) $(SYSCONFDIR)/logrotate.d $(SYSCONFDIR)/cron.hourly
 	sudo chown civibot:civibot $(LOGDIR)
 	sudo chown civibot:civibot $(BACKUPDIR)
-	sudo /bin/cp -p $(CIVIBOTDIR)/contrib/civibot.service $(INITDIR)
+	sudo /bin/cp -p $(CIVIBOTDIR)/files/civibot.service $(INITDIR)
 	sudo /bin/systemctl daemon-reload
-	sudo /bin/cp -sf $(CIVIBOTDIR)/contrib/civibot.logrotate $(SYSCONFDIR)/logrotate.d
-	sudo /bin/cp -sf $(CIVIBOTDIR)/contrib/backup-brain.sh $(SYSCONFDIR)/cron.hourly
+	sudo /bin/cp -sf $(CIVIBOTDIR)/files/civibot.logrotate $(SYSCONFDIR)/logrotate.d
+	sudo /bin/cp -sf $(CIVIBOTDIR)/files/backup-brain.sh $(SYSCONFDIR)/cron.hourly
 	sudo /bin/systemctl enable civibot.service
 	sudo /bin/systemctl restart civibot.service
 
