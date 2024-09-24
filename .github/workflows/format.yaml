@@ -1,0 +1,25 @@
+name: Format
+
+on:
+  pull_request:
+    branches-ignore:
+      - 'spike/**'
+
+# cancels in-progress jobs on this pull request
+# avoids wasted work when a new commit is pushed
+concurrency:
+  group: format-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+jobs:
+  formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run formatter
+        run: npm run lint
