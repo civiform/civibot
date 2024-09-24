@@ -2,14 +2,14 @@ const { getBrain, saveBrain } = require('./brain.js');
 
 const brain = getBrain();
 
-module.exports = (app) => {
-  loadUsers(app);
+module.exports = (app, token) => {
+  loadUsers(app, token);
 };
 
-async function loadUsers(app) {
+async function loadUsers(app, token) {
   try {
     const result = await app.client.users.list({
-      token: process.env.SLACK_BOT_TOKEN
+      token: token
     });
 
     const brain = getBrain();

@@ -1,5 +1,10 @@
 const { exec } = require('child_process');
-const { ADMIN_ROOMS, ADMIN_USERS, CIVIBOT_GIT_HOME } = require('../utils.js');
+const { ADMIN_ROOMS, ADMIN_USERS, CIVIBOT_GIT_HOME } = require('../utils/constants.js');
+
+const help = {
+  '!deploy <ref>': 'Deploys CiviBot onto a new revision, either a SHA or a branch. Only usable by CiviBot admins in the admin room.',
+  '!deploy latest': 'Deploys CiviBot onto the latest revision on main. Only usable by CiviBot admins in the admin room.',
+}
 
 function execWithLog(command, callback) {
   console.log(`Executing ${command}`);
@@ -106,15 +111,18 @@ function deploy(rev, force, context) {
   });
 }
 
-module.exports = (app) => {
-  app.message(/^!deploy (\S+)( force)?$/, ({ message, context }) => {
-    if(ADMIN_ROOMS.includes(message.channel) && ADMIN_USERS.includes(message.user)) {
-      let rev = context.matches[1];
-      let force = context.matches[2]
-      if(rev === 'latest') {
-        rev = 'origin/main';
+module.exports = {
+  help: help,
+  setup: (app) => {
+    app.message(/^!deploy (\S+)( force)?$/, ({ message, context }) => {
+      if(ADMIN_ROOMS.includes(message.channel) && ADMIN_USERS.includes(message.user)) {
+        let rev = context.matches[1];
+        let force = context.matches[2]
+        if(rev === 'latest') {
+          rev = 'origin/main';
+        }
+        deploy(rev, force, context);
       }
-      deploy(rev, force, context);
-    }
-  })
+    })
+  }
 }

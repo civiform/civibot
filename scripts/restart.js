@@ -1,5 +1,9 @@
 const exec = require('child_process').exec;
-const { ADMIN_ROOMS, ADMIN_USERS } = require('../utils.js');
+const { ADMIN_ROOMS, ADMIN_USERS } = require('../utils/constants.js');
+
+const help = {
+  '!restart': 'Restarts CiviBot. Only usable by CiviBot admins in the admin room.'
+}
 
 function restart() {
   console.log('Restarting CiviBot...');
@@ -16,13 +20,16 @@ function restart() {
   }, 2000);
 }
 
-module.exports = (app) => {
-  app.message(/^!\s*restart$/, async ({ message, context }) => {
-    console.log(message);
-    if(ADMIN_ROOMS.includes(message.channel) && ADMIN_USERS.includes(message.user)) {
-      console.log(`Restart triggered by ${message.user}`);
-      restart();
-      await context.say("Restarting now...");
-    }
-  });
+module.exports = {
+  help: help,
+  setup: (app) => {
+    app.message(/^!\s*restart$/, async ({ message, context }) => {
+      console.log(message);
+      if(ADMIN_ROOMS.includes(message.channel) && ADMIN_USERS.includes(message.user)) {
+        console.log(`Restart triggered by ${message.user}`);
+        restart();
+        await context.say("Restarting now...");
+      }
+    });
+  }
 }
