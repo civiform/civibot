@@ -31,7 +31,8 @@ Host github.com
 ## Development
 You can deploy a different branch of the civibot repo by using the `!deploy` command. You must be in either #civibot-admin or #civibot-test to do this, and must be on the list of CiviBot admins. If you get things stuck with the app unable to start on the new branch, contact Nick to SSH into the node and fix it (or do so yourself if you have the SSH key). There is also a `!restart` command in case things get weird, but it's still responding to commands.
 
+Run `make fmt` to format your code before submitting a PR.
+
 ### Tips
 * If you want to be able to have CiviBot respond in whatever context it was triggered in (channel, DM, thread), use `context.say` instead of just `say`. If you need to respond with custom blocks (see the xkcd script), use the regular `say`.
 * Create a `help` hash that maps command names to help text. Then, export both this and a `setup` function that does the actual meat of the script. These two things are automatically loaded by the app.
-

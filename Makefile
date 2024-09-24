@@ -9,9 +9,8 @@ LOGDIR=/home/civibot/logs
 BACKUPDIR=/home/civibot/brain_backups
 INSTALL=/bin/install -p
 
-lint:
-	npm install eslint --save-dev
-	npx eslint .
+fmt:
+	npm run lint:fix
 
 node_modules:
 	test -d node_modules || npm install
