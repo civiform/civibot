@@ -10,7 +10,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.654.0",
-    "@slack/bolt": "^3.21.1"
+    "@slack/bolt": "^3.21.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",

@@ -13,7 +13,7 @@ let secrets = {
 
 async function loadAllSecrets() {
   const { SecretsManagerClient, ListSecretsCommand, GetSecretValueCommand } = await import('@aws-sdk/client-secrets-manager');
-  const secretsManager = new SecretsManagerClient({ region: 'us-east-1', profile: 'default' });
+  const secretsManager = new SecretsManagerClient({ region: 'us-east-1' });
   const listResponse = await secretsManager.send(new ListSecretsCommand({}));
   const secretArns = listResponse.SecretList;
   const secretPromises = Object.keys(secrets).map(async (secret) => {

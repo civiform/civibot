@@ -1,5 +1,6 @@
 module.exports = (app) => {
   const { getBrain, saveBrain } = require('../brain.js');
+  const { ADMIN_ROOMS, ADMIN_USERS } = require('../utils.js');
 
   const brain = getBrain();
   
@@ -75,7 +76,7 @@ module.exports = (app) => {
   }
 
   function cheatKarma(subject, amount) {
-    brain.karma[subject] = amount;
+    brain.karma[subject] = Number(amount);
     saveBrain();
   }
 
@@ -93,8 +94,7 @@ module.exports = (app) => {
   }
 
   function selfKarma(user, subject) {
-    return false
-    //return subject == user || (brain.users[user] &&  brain.users[user].name == subject)
+    return subject == user || (brain.users[user] &&  brain.users[user].name == subject)
   }
 
   function filtered(subject) {
@@ -215,7 +215,25 @@ module.exports = (app) => {
     }
   });
 
-  app.message(/^!\s*karma (.+)$/i, async ({ context }) => {
+  app.message(/^!\s*karma set (\d+) (.+)$/, async ({ message, context }) => {
+    await context.say("test");
+    if (ADMIN_ROOMS.includes(message.channel) && ADMIN_USERS.includes(message.user)) {
+      await context.say("valid")
+      let karma = context.matches[1];
+      let subject = context.matches[2].trim();
+      let userMatch =  subject.match(/<@(\S+)>/);
+      if(userMatch) {
+        subject = getUser(userMatch[1]);
+      } else {
+        subject = subject.toLowerCase();
+      }
+      let prevKarma = getKarma(subject);
+      cheatKarma(subject, karma);
+      await context.say(`${subject}'s karma has been set to ${karma} (was ${prevKarma})`);
+    }
+  });
+
+  app.message(/^!\s*karma(?!\s+(set|clear|reset|top|best|bottom|worst)\b)(.+)$/i, async ({ context }) => {
     let subject = context.matches[1].trim();
     let userMatch = subject.match(/<@(\S+)>/);
     if (userMatch) {

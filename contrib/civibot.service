@@ -15,7 +15,7 @@ RestartSec=10
 StandardOutput=null
 StandardError=null
 
-ExecStart=/bin/bash -c "node app.js >> /home/civibot/civibot_logs/civibot.log 2>&1"
+ExecStart=/bin/bash -c "node app.js >> /home/civibot/logs/civibot.log 2>&1"
 
 [Install]
 WantedBy=multi-user.target

@@ -5,7 +5,7 @@ SYSCONFDIR=$(PREFIX)/etc
 VARDIR=$(PREFIX)/var
 INITDIR=$(SYSCONFDIR)/systemd/system
 CIVIBOTDIR=/home/civibot/civibot
-LOGDIR=/home/civibot/civibot_logs
+LOGDIR=/home/civibot/logs
 BACKUPDIR=/home/civibot/brain_backups
 INSTALL=/bin/install -p
 
@@ -17,7 +17,7 @@ node_modules:
 	test -d node_modules || npm install
 
 install:
-	npm ci
+	npm install
 	# Remove any cruft not stored in git
 	# git clean -d -f
 	sudo mkdir -p $(LOGDIR) $(BACKUPDIR) $(SYSCONFDIR)/civibot $(INITDIR) $(SYSCONFDIR)/logrotate.d $(SYSCONFDIR)/cron.hourly
