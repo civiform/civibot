@@ -1,6 +1,5 @@
 module.exports = (app) => {
   const { getBrain, saveBrain } = require('../brain.js');
-  const { respond } = require('../utils.js');
 
   const brain = getBrain();
 
@@ -18,7 +17,7 @@ module.exports = (app) => {
       saveBrain();
       return `Alright, ${key} is also ${val}`;
     } else {
-      return `No fact for ${key}. It can't also be ${valu} if it isn't anything yet.`;
+      return `No fact for ${key}. It can't also be ${val} if it isn't anything yet.`;
     }
   }
 
@@ -52,11 +51,12 @@ module.exports = (app) => {
   }
 
   function handle(text) {
-    if (match = /^~(.+?) is also (.+)/i.exec(text)) {
+    let match;
+    if ((match = /^~(.+?) is also (.+)/i.exec(text))) {
       return append(match[1], match[2]);
-    } else if (match = /^~(.+?) is (.+)/i.exec(text)) {
+    } else if ((match = /^~(.+?) is (.+)/i.exec(text))) {
       return add(match[1], match[2]);
-    } else if (match = /^~(.+)/i.exec(text)) {
+    } else if ((match = /^~(.+)/i.exec(text))) {
       return get(match[1]);
     }
   }
@@ -78,11 +78,11 @@ module.exports = (app) => {
     }
   });
 
-  app.message(/^!facts? delete "(.*)"/i, async ({ message, context }) => {
+  app.message(/^!facts? delete "(.*)"/i, async ({ context }) => {
     await context.say(del(context.matches[1]));
   });
 
-  app.message(/^!facts? delete(.*)$/i, async ({ message, context }) => {
+  app.message(/^!facts? delete(.*)$/i, async ({ context }) => {
     await context.say(del(context.matches[1]));
   });
 

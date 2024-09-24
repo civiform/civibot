@@ -1,19 +1,19 @@
 const { exec } = require('child_process');
-const { ADMIN_ROOMS, CIVIBOT_GIT_HOME } = require('../utils.js');
+const { ADMIN_ROOMS, ADMIN_USERS, CIVIBOT_GIT_HOME } = require('../utils.js');
 
 function execWithLog(command, callback) {
   console.log(`Executing ${command}`);
   exec(command, (error, stdout, stderr) => {
     if(stdout) { console.log(`STDOUT\n${stdout}`); }
     if(stderr) { console.log(`STDERR\n${stderr}`); }
-    callback(error, stdout, stderr);
+    callback(error);
   });
 }
 
 function gitRevParse(rev, context, callback) {
-  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git rev-parse ${rev}`, (error, stdout, stderr) => {
+  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git rev-parse ${rev}`, (error, stdout) => {
     if(error) {
-      console.log(`git rev-parse ${rev} failse: ${error}`);
+      console.log(`git rev-parse ${rev} failed: ${error}`);
       context.say(`git rev-parse ${rev} failed: ${error}`);
     } else {
       if(callback) { callback(stdout.trim()); }
@@ -22,7 +22,7 @@ function gitRevParse(rev, context, callback) {
 }
 
 function gitFetch(context, callback) {
-  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git fetch origin`, (error, stdout, stderr) => {
+  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git fetch origin`, (error) => {
     if(error) {
       console.log(`git fetch origin failed: ${error}`);
       context.say(`git fetch origin failed: ${error}`);
@@ -33,7 +33,7 @@ function gitFetch(context, callback) {
 }
 
 function gitCheckout(rev, context, callback) {
-  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git checkout ${rev}`, (error, stdout, stderr) => {
+  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git checkout ${rev}`, (error) => {
     if(error) {
       console.log(`git checkout ${rev} failed: ${error}`);
       context.say(`git checkout ${rev} failed: ${error}`);
@@ -44,14 +44,14 @@ function gitCheckout(rev, context, callback) {
 }
 
 function gitLog(parent, child, context, callback) {
-  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git log --no-merges --pretty=format:'%h %s - %an' ${parent}..${child}`, (error, stdout, stderr) => {
+  execWithLog(`cd ${CIVIBOT_GIT_HOME} && /usr/bin/git log --no-merges --pretty=format:'%h %s - %an' ${parent}..${child}`, (error, stdout) => {
     if(error) {
       console.log(`git log ${parent}..${child} failed: ${error}`);
       context.say(`git log ${parent}..${child} failed: ${error}`);
     } else {
-      output = stdout.trim()
-      logs = []
-      if(!!output) {
+      let output = stdout.trim()
+      let logs = []
+      if(output) {
         logs = output.split("\n")
       }
       if(callback) { callback(logs); }
@@ -60,7 +60,7 @@ function gitLog(parent, child, context, callback) {
 }
 
 function install(context, callback){
-  execWithLog(`make install`, (error, stdout, stderr) => {
+  execWithLog(`make install`, (error) => {
     if(error) {
       console.log(`Make failed: ${error}`);
       context.say(`Make failed: ${error}`);
@@ -71,6 +71,9 @@ function install(context, callback){
 }
 
 function deploy(rev, force, context) {
+  // This is a little awkward to read, but it allows the process to stop if
+  // any of the commands fail without having to wrap every command with its
+  // own error handling.
   gitRevParse("HEAD", context, (head_rev) => {
     gitFetch(context, () => {
       gitRevParse(rev, context, (parsed_rev) => {
@@ -86,7 +89,7 @@ function deploy(rev, force, context) {
         }
         gitLog(head_rev, parsed_rev, context, (commits) => {
           if(commits.length > 0) {
-            m = commits.join("\n")
+            let m = commits.join("\n")
             if(commits.length > 5) {
               m += `\n..and ${commits.length - 5} more`
             }
@@ -105,9 +108,9 @@ function deploy(rev, force, context) {
 
 module.exports = (app) => {
   app.message(/^!deploy (\S+)( force)?$/, ({ message, context }) => {
-    if(ADMIN_ROOMS.includes(message.channel)){
-      rev = context.matches[1];
-      force = context.matches[2]
+    if(ADMIN_ROOMS.includes(message.channel) && ADMIN_USERS.includes(message.user)) {
+      let rev = context.matches[1];
+      let force = context.matches[2]
       if(rev === 'latest') {
         rev = 'origin/main';
       }

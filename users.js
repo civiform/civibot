@@ -1,5 +1,7 @@
 const { getBrain, saveBrain } = require('./brain.js');
 
+const brain = getBrain();
+
 module.exports = (app) => {
   loadUsers(app);
 };

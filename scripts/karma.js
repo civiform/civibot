@@ -3,22 +3,22 @@ module.exports = (app) => {
 
   const brain = getBrain();
   
-  ignorelist = [
+  const IGNORELIST = [
     /^(lib)?stdc$/,
     /-{2,}/,
     /^[rwx-]+$/,
     /```/,
   ]
 
-  ADD_RESPONSES = [
+  const ADD_RESPONSES = [
     "gets a point!", "gained some karma!", "karma +1!", "is even more awesome!"
   ]
 
-  SUBTRACT_RESPONSES = [
+  const SUBTRACT_RESPONSES = [
     "lost a point.", "lost some karma.", "karma -1.", "is less awesome."
   ]
 
-  SELF_RESPONSES = [
+  const SELF_RESPONSES = [
     "Sorry, no cheating %name!", "Nice try %name, but no.", "You can't give karma to yourself %name."
   ]
 
@@ -98,14 +98,14 @@ module.exports = (app) => {
   }
 
   function filtered(subject) {
-    return ignorelist.some((regex) => subject.match(regex));
+    return IGNORELIST.some((regex) => subject.match(regex));
   }
 
   async function changeKarma(message, matches, increment) {
-    unique = new Set();
-    messages = [];
+    let unique = new Set();
+    let messages = [];
     for (const match of matches) {
-      subject = match.toLowerCase().trim();
+      let subject = match.toLowerCase().trim();
       if (unique.has(subject)) {
         continue;
       }
@@ -129,13 +129,13 @@ module.exports = (app) => {
   }
 
   app.message(/(\S|\s)(--|\+\+)(\s|$)/, async ({ message, context }) => {
-    plus_matches = []
+    let plus_matches = []
     // Group 4 is @name followed by a space
     // Group 5 is word not followed by a space, :, or +
     // Group 6 is word or words in parentheses
     // Group 7 is emojis
     // Group 8 is space, delimiter for other scripts, or EOL
-    plus_matcher = new RegExp(
+    const plus_matcher = new RegExp(
     "(" +
       "(" +
         "(" +
@@ -148,17 +148,17 @@ module.exports = (app) => {
         "(\\s|[!-~]|$)" +
       ")" +
     ")", 'g');
-    matches = message.text.matchAll(plus_matcher);
+    let matches = message.text.matchAll(plus_matcher);
     for (const match of matches) {
       plus_matches.push(...[getUser(match[4]), match[5], match[6], match[7]].filter(Boolean));
     }
-    result = await changeKarma(message, plus_matches, true);
+    let result = await changeKarma(message, plus_matches, true);
     if (result && result.trim()) {
       await context.say(result);
     }
 
-    minus_matches = []
-    minus_matcher = new RegExp(
+    let minus_matches = []
+    const minus_matcher = new RegExp(
       "(" +
         "(" +
           "(" +
@@ -182,8 +182,8 @@ module.exports = (app) => {
   });
 
   app.message(/^!\s*karma\s?(top|best)?$/i, async ({ context }) => {
-    messages = ['The Most Karmically Awesome'];
-    top_karma = top(5);
+    let messages = ['The Most Karmically Awesome'];
+    let top_karma = top(5);
     let rank = 1;
     for (const [subject, karma] of top_karma) {
       messages.push(`${rank}. ${subject}: ${karma}`);
@@ -193,8 +193,8 @@ module.exports = (app) => {
   });
 
   app.message(/^!\s*karma (bottom|worst)$/i, async ({ context }) => {
-    messages = ['The Most Karmically Challenged'];
-    top_karma = bottom(5);
+    let messages = ['The Most Karmically Challenged'];
+    let top_karma = bottom(5);
     let rank = 1;
     for (const [subject, karma] of top_karma) {
       messages.push(`${rank}. ${subject}: ${karma}`);
@@ -204,7 +204,7 @@ module.exports = (app) => {
   });
 
   app.message(/^!\s*karma (clear|reset) ([\s\S]+)$/, async ({ context }) => {
-    subject = context.matches[2].trim();
+    let subject = context.matches[2].trim();
     if (subject.match(/^<@(\S+)>$/) || userNameExists(subject)) {
       await context.say("You can't clear a person's karma. Don't be mean!");
     } else {
@@ -216,8 +216,8 @@ module.exports = (app) => {
   });
 
   app.message(/^!\s*karma (.+)$/i, async ({ context }) => {
-    subject = context.matches[1].trim();
-    userMatch = subject.match(/<@(\S+)>/);
+    let subject = context.matches[1].trim();
+    let userMatch = subject.match(/<@(\S+)>/);
     if (userMatch) {
       subject = getUser(userMatch[1]);
     } else {

@@ -9,7 +9,9 @@ LOGDIR=/home/civibot/civibot_logs
 BACKUPDIR=/home/civibot/brain_backups
 INSTALL=/bin/install -p
 
-all: lint test
+lint:
+	npm install eslint --save-dev
+	npx eslint .
 
 node_modules:
 	test -d node_modules || npm install
@@ -28,12 +30,19 @@ install:
 	sudo /bin/systemctl enable civibot.service
 	sudo /bin/systemctl restart civibot.service
 
+uninstall:
+	# This only removes the service, logrotate, and cronjob, not the app files
+	sudo /bin/systemctl stop civibot.service
+	sudo /bin/systemctl disable civibot.service
+	sudo rm -f $(INITDIR)/civibot.service
+	sudo rm -f $(SYSCONFDIR)/logrotate.d/civibot.logrotate
+	sudo rm -f $(SYSCONFDIR)/cron.hourly/backup-brain.sh
+	sudo /bin/systemctl daemon-reload
+
 restart:
 	sudo /bin/systemctl restart civibot.service
 
 .PHONY: list
 list:
+	# This horrible thing lists user-defined targets of the Makefile
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
-
-clean:
-	clear

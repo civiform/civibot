@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { loadBrain } = require('./brain.js');
 const { ADMIN_ROOMS } = require('./utils.js');
+const process = require('process');
 
 let secrets = {
   'SLACK_BOT_TOKEN': '',
