@@ -216,9 +216,7 @@ module.exports = (app) => {
   });
 
   app.message(/^!\s*karma set (\d+) (.+)$/, async ({ message, context }) => {
-    await context.say("test");
     if (ADMIN_ROOMS.includes(message.channel) && ADMIN_USERS.includes(message.user)) {
-      await context.say("valid")
       let karma = context.matches[1];
       let subject = context.matches[2].trim();
       let userMatch =  subject.match(/<@(\S+)>/);
@@ -233,7 +231,7 @@ module.exports = (app) => {
     }
   });
 
-  app.message(/^!\s*karma(?!\s+(set|clear|reset|top|best|bottom|worst)\b)(.+)$/i, async ({ context }) => {
+  app.message(/^!\s*karma\s+(?!set|clear|reset|top|best|bottom|worst\b)(.+)$/i, async ({ context }) => {
     let subject = context.matches[1].trim();
     let userMatch = subject.match(/<@(\S+)>/);
     if (userMatch) {

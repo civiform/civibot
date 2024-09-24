@@ -6,7 +6,7 @@ function execWithLog(command, callback) {
   exec(command, (error, stdout, stderr) => {
     if(stdout) { console.log(`STDOUT\n${stdout}`); }
     if(stderr) { console.log(`STDERR\n${stderr}`); }
-    callback(error);
+    callback(error, stdout, stderr);
   });
 }
 
