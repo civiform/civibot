@@ -4,8 +4,6 @@ const help = {
     'Add karma to <subject>. Can enclose in () for a subject with spaces. Can use @ to mention a user.',
   '<subject>--':
     'Subtract karma from <subject>. Can enclose in () for a subject with spaces. Can use @ to mention a user.',
-  '!karma top': 'Get the top 5 karma subjects',
-  '!karma bottom': 'Get the bottom 5 karma subjects',
   '!karma clear <subject>':
     "Clear karma for <subject>. You can't do this to a user.",
   '!karma set <amount> <subject>':
@@ -220,28 +218,6 @@ module.exports = {
       if (result && result.trim()) {
         await context.say(result)
       }
-    })
-
-    app.message(/^!\s*karma\s?(top|best)?$/i, async ({context}) => {
-      let messages = ['The Most Karmically Awesome']
-      let top_karma = top(5)
-      let rank = 1
-      for (const [subject, karma] of top_karma) {
-        messages.push(`${rank}. ${subject}: ${karma}`)
-        rank++
-      }
-      await context.say(messages.join('\n'))
-    })
-
-    app.message(/^!\s*karma (bottom|worst)$/i, async ({context}) => {
-      let messages = ['The Most Karmically Challenged']
-      let top_karma = bottom(5)
-      let rank = 1
-      for (const [subject, karma] of top_karma) {
-        messages.push(`${rank}. ${subject}: ${karma}`)
-        rank++
-      }
-      await context.say(messages.join('\n'))
     })
 
     app.message(/^!\s*karma (clear|reset) ([\s\S]+)$/, async ({context}) => {
