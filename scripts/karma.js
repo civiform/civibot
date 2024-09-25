@@ -222,28 +222,6 @@ module.exports = {
       }
     })
 
-    app.message(/^!\s*karma\s?(top|best)?$/i, async ({context}) => {
-      let messages = ['The Most Karmically Awesome']
-      let top_karma = top(5)
-      let rank = 1
-      for (const [subject, karma] of top_karma) {
-        messages.push(`${rank}. ${subject}: ${karma}`)
-        rank++
-      }
-      await context.say(messages.join('\n'))
-    })
-
-    app.message(/^!\s*karma (bottom|worst)$/i, async ({context}) => {
-      let messages = ['The Most Karmically Challenged']
-      let top_karma = bottom(5)
-      let rank = 1
-      for (const [subject, karma] of top_karma) {
-        messages.push(`${rank}. ${subject}: ${karma}`)
-        rank++
-      }
-      await context.say(messages.join('\n'))
-    })
-
     app.message(/^!\s*karma (clear|reset) ([\s\S]+)$/, async ({context}) => {
       let subject = context.matches[2].trim()
       if (subject.match(/^<@(\S+)>$/) || userNameExists(subject)) {
