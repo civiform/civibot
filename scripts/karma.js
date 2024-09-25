@@ -4,8 +4,6 @@ const help = {
     'Add karma to <subject>. Can enclose in () for a subject with spaces. Can use @ to mention a user.',
   '<subject>--':
     'Subtract karma from <subject>. Can enclose in () for a subject with spaces. Can use @ to mention a user.',
-  '!karma top': 'Get the top 5 karma subjects',
-  '!karma bottom': 'Get the bottom 5 karma subjects',
   '!karma clear <subject>':
     "Clear karma for <subject>. You can't do this to a user.",
   '!karma set <amount> <subject>':
