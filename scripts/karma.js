@@ -20,6 +20,9 @@ module.exports = {
 
     const brain = getBrain()
 
+    // Filter things that might get triggered accidentally
+    // like c++, headers that have -- in them, ls output.
+    // Ignore code blocks
     const IGNORELIST = [/^(lib)?stdc$/, /-{2,}/, /^[rwx-]+$/, /```/]
 
     const ADD_RESPONSES = [
