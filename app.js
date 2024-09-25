@@ -12,11 +12,6 @@ let secrets = {
   SLACK_APP_TOKEN: '',
 }
 
-// This is used to prevent querying for all users on startup,
-// since doing this frequently during development will get
-// you rate limited.
-let SKIP_USER_LOAD = false
-
 async function loadAllSecrets() {
   const {SecretsManagerClient, ListSecretsCommand, GetSecretValueCommand} =
     await import('@aws-sdk/client-secrets-manager')
@@ -67,9 +62,7 @@ async function startApp() {
   })
 
   // Load all users on startup, then listen for new user events
-  if (!SKIP_USER_LOAD) {
-    require('./utils/users.js')(app, secrets.SLACK_BOT_TOKEN)
-  }
+  require('./utils/users.js')(app, secrets.SLACK_BOT_TOKEN)
 
   // Load scripts
   const scriptsPath = path.join(__dirname, 'scripts')
