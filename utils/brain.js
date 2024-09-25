@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const brainFile = path.join(__dirname, 'brain.json')
+const brainFile = path.join(__dirname, '../brain.json')
 
 // Declare the brain object as a singleton
 let brain = {}
@@ -12,6 +12,7 @@ module.exports = {loadBrain, saveBrain, getBrain}
 function loadBrain() {
   try {
     if (fs.existsSync(brainFile)) {
+      console.log('Loading brain from disk')
       const data = fs.readFileSync(brainFile, 'utf8')
       brain = JSON.parse(data)
     }

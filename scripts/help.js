@@ -1,10 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 
-const help = {
-  '!help': 'Show this message',
-}
-
 const scriptsDir = path.join(__dirname)
 
 function getHelpMessages() {
@@ -23,7 +19,6 @@ function getHelpMessages() {
 }
 
 module.exports = {
-  help: help,
   setup: (app) => {
     app.message(/^!\s*help$/, async ({context}) => {
       const helpMessages = getHelpMessages()

@@ -1,5 +1,4 @@
 const ADMIN_ROOMS = [
-  'C07K4F86TD4', // #civibot-test
   'C07N8PXBDUP', // #civibot-admin
 ]
 
@@ -8,7 +7,7 @@ const ADMIN_ROOMS = [
 // the brain.
 const ADMIN_USERS = [
   'U04LC4N7RL2', // nick.burgan
-  'U04M6JKQG1H', // rock.fine
+  'U04M6JKQG1H', // rocky.fine
   'U034APBAEJU', // gwendolyn.goetz
 ]
 
