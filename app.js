@@ -15,7 +15,7 @@ let secrets = {
 // This is used to prevent querying for all users on startup,
 // since doing this frequently during development will get
 // you rate limited.
-let SKIP_USER_LOAD = true
+let SKIP_USER_LOAD = false
 
 async function loadAllSecrets() {
   const {SecretsManagerClient, ListSecretsCommand, GetSecretValueCommand} =
