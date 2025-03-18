@@ -128,6 +128,10 @@ module.exports = {
       return IGNORELIST.some((regex) => subject.match(regex))
     }
 
+    function isUser(subject) {
+      return Object.values(brain.users).some((user) => user.name == subject)
+    }
+
     async function changeKarma(message, matches, increment) {
       let unique = new Set()
       let messages = []
@@ -146,14 +150,18 @@ module.exports = {
         }
         if (increment) {
           addKarma(subject)
-          messages.push(
-            `${subject} ${addResponse()} (Karma: ${getKarma(subject)})`,
-          )
+          report = ''
+          if (!isUser(subject)) {
+            report = `(Karma ${getKarma(subject)})`
+          }
+          messages.push(`${subject} ${addResponse()} ${report}`)
         } else {
           subtractKarma(subject)
-          messages.push(
-            `${subject} ${subtractResponse()} (Karma: ${getKarma(subject)})`,
-          )
+          report = ''
+          if (!isUser(subject)) {
+            report = `(Karma ${getKarma(subject)})`
+          }
+          messages.push(`${subject} ${subtractResponse()} ${report}`)
         }
       }
       return messages.join('\n')
@@ -211,7 +219,7 @@ module.exports = {
       matches = message.text.matchAll(minus_matcher)
       for (const match of matches) {
         minus_matches.push(
-          ...[match[4], match[5], match[6], match[7]].filter(Boolean),
+          ...[getUser(match[4]), match[5], match[6], match[7]].filter(Boolean),
         )
       }
       result = await changeKarma(message, minus_matches, false)
@@ -257,7 +265,7 @@ module.exports = {
 
     app.message(
       /^!\s*karma\s+(?!set|clear|reset|top|best|bottom|worst\b)(.+)$/i,
-      async ({context}) => {
+      async ({message, context, client}) => {
         let subject = context.matches[1].trim()
         let userMatch = subject.match(/<@(\S+)>/)
         if (userMatch) {
@@ -266,7 +274,23 @@ module.exports = {
           subject = subject.toLowerCase()
         }
         if (subject in brain.karma) {
-          await context.say(`Karma for ${subject}: ${getKarma(subject)}`)
+          user = isUser(subject)
+          if (user && !selfKarma(message.user, subject)) {
+            await context.say(
+              "Sorry, you can only look at your own karma, not somebody else's.",
+            )
+          } else {
+            text = `Karma for ${subject}: ${getKarma(subject)}`
+            if (user) {
+              await client.chat.postEphemeral({
+                channel: message.channel,
+                user: message.user,
+                text: text,
+              })
+            } else {
+              await context.say(text)
+            }
+          }
         } else {
           await context.say(`No karma for ${subject}`)
         }
