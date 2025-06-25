@@ -9,6 +9,7 @@ const urls = {
   'Arkansas - Prod': 'https://myarciviform.arkansas.gov',
   'Arkansas - Staging': 'https://civiform-staging.ar.gov',
   'Charlotte - Prod': 'https://civiform.charlottenc.gov',
+  'Charlotte - Staging': 'https://civiform-staging.charlottenc.gov',
 }
 
 const help = {
