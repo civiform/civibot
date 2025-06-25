@@ -8,7 +8,8 @@ const urls = {
   'Bloomington - Prod': 'https://civiform.bloomington.in.gov',
   'Arkansas - Prod': 'https://myarciviform.arkansas.gov',
   'Arkansas - Staging': 'https://civiform-staging.ar.gov',
-  'Charlotte - Staging': 'https://civiform-test.charlottenc.gov',
+  'Charlotte - Prod': 'https://civiform.charlottenc.gov',
+  'Charlotte - Staging': 'https://civiform-staging.charlottenc.gov',
 }
 
 const help = {
