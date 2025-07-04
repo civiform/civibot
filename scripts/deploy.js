@@ -151,7 +151,7 @@ function deploy(rev, force, context) {
 
 function normalizeRev(rev) {
   const shaRegex = /^[0-9a-f]{7,40}$/i
-  if (shaRegex.test(rev)) {
+  if (shaRegex.test(rev) || rev.startsWith('origin/')) {
     return rev
   }
   return `origin/${rev}`
