@@ -59,7 +59,7 @@ function gitFetch(context, callback) {
 
 function gitCheckout(rev, context, callback) {
   execWithLog(
-    `cd ${CIVIBOT_GIT_HOME} && /usr/bin/git checkout ${rev}`,
+    `cd ${CIVIBOT_GIT_HOME} && /usr/bin/git stash clear && /usr/bin/git stash && /usr/bin/git checkout ${rev}`,
     (error) => {
       if (error) {
         console.log(`git checkout ${rev} failed: ${error}`)
@@ -149,6 +149,14 @@ function deploy(rev, force, context) {
   })
 }
 
+function normalizeRev(rev) {
+  const shaRegex = /^[0-9a-f]{7,40}$/i
+  if (shaRegex.test(rev)) {
+    return rev
+  }
+  return `origin/${rev}`
+}
+
 module.exports = {
   help: help,
   setup: (app) => {
@@ -162,6 +170,8 @@ module.exports = {
         if (rev === 'latest') {
           rev = 'origin/main'
         }
+        // Only support deploying a branch from origin for now
+        rev = normalizeRev(rev)
         deploy(rev, force, context)
       }
     })
