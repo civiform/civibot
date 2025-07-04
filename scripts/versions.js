@@ -17,60 +17,27 @@ const help = {
 }
 
 async function fetchWithRedirects(url, maxRedirects = 10) {
-  let currentUrl = url
-  let cookies = ''
-  let redirectCount = 0
+  let currentUrl = `${url}/programs` // Avoid having to follow redirects
 
-  while (redirectCount < maxRedirects) {
-    console.debug('Fetching', currentUrl)
-    const res = await fetch(currentUrl, {
-      headers: {
-        Cookie: cookies,
-      },
-      redirect: 'manual',
-    })
-
-    if (res.status >= 300 && res.status < 400 && res.headers.get('location')) {
-      const setCookies = []
-      res.headers.forEach((value, name) => {
-        if (name.toLowerCase() === 'set-cookie') {
-          setCookies.push(value)
-        }
-      })
-      if (setCookies.length > 0) {
-        cookies = mergeCookies(cookies, setCookies)
-      }
-
-      currentUrl = new URL(res.headers.get('location'), currentUrl).href
-      redirectCount++
-    } else {
-      return await res.text()
-    }
-  }
-  throw new Error('Too many redirects')
+  console.debug('Fetching', currentUrl)
+  const res = await fetch(currentUrl, {
+    jar: true,
+    followAllRedirects: true,
+    maxRedirects: 10,
+  })
+  return await res.text()
 }
 
-function mergeCookies(existingCookies, setCookieHeaders) {
-  const cookieMap = {}
-  existingCookies.split('; ').forEach((cookie) => {
-    const [name, value] = cookie.split('=')
-    if (name && value) cookieMap[name] = value
-  })
-  setCookieHeaders.forEach((cookie) => {
-    const [cookiePart] = cookie.split(';')
-    const [name, value] = cookiePart.split('=')
-    if (name && value) cookieMap[name] = value
-  })
-  return Object.entries(cookieMap)
-    .map(([name, value]) => `${name}=${value}`)
-    .join('; ')
-}
-
-function extractShaFromHTML(html) {
+function extractShaFromHTML(html, url) {
   const $ = cheerio.load(html)
   const metaTag = $('meta[name="civiform-build-tag"]').attr('content')
   if (metaTag) {
     return metaTag.split('-')[1]
+  } else {
+    console.debug(
+      `Could not find the civiform-build-tag in response from ${url} in the following HTML: `,
+      html,
+    )
   }
 }
 
@@ -100,7 +67,7 @@ module.exports = {
           // a cookie, we can get rid of the cookie part.
           try {
             const body = await fetchWithRedirects(url)
-            const sha = extractShaFromHTML(body)
+            const sha = extractShaFromHTML(body, url)
             if (sha) {
               const v = await execCommand(`cd civiform && git describe ${sha}`)
               return `${site}: ${v}`
