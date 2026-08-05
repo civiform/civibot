@@ -2,7 +2,7 @@ const help = {
   '~<fact>': 'Get the value of a fact',
   '~<fact> is <value>': 'Add a fact',
   '~<fact> is also <value>': 'Append another value to a fact',
-  'no, <fact> is <value>': 'Set an existing fact to a different value',
+  '~no, <fact> is <value>': 'Set an existing fact to a different value',
   '!facts delete <fact>': 'Delete a fact',
   '!facts list': 'List all facts known',
   '!facts random': 'Show a random fact',
@@ -77,7 +77,7 @@ module.exports = {
       await context.say(handle(message.text))
     })
 
-    app.message(/^no, (.+) is (.+)/i, async ({context}) => {
+    app.message(/^~no, (.+) is (.+)/i, async ({context}) => {
       await context.say(set(context.matches[1], context.matches[2]))
     })
 
