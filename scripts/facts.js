@@ -77,10 +77,6 @@ module.exports = {
       await context.say(handle(message.text))
     })
 
-    app.message(/^~no, (.+) is (.+)/i, async ({context}) => {
-      await context.say(set(context.matches[1], context.matches[2]))
-    })
-
     app.message(/^!facts? list/i, async ({context}) => {
       const facts = Object.keys(brain.facts)
       if (facts.length == 0) {
